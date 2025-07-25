@@ -6,6 +6,10 @@
 * DESCRIPTION :
 * A Cryptocurrency Wallet Manager
 */
+
+#define FLAG_PROCESSED 0x01  
+#define FLAG_REFUNDED  0x02
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,15 +18,18 @@
 #include <iostream>
 
 typedef struct Transaction {
-    int data;
+    double amount;
+    unsigned char flags;
     struct Transaction* next;
 } Transaction;
 
 void display();
 void printTransactions(Transaction* head);
-void insertEnd(Transaction** head, int value);
-Transaction* createNode(int value);
-void addTransaction(Transaction* head);
+void insertEnd(Transaction** head, double value);
+Transaction* createNode(double value);
+void addTransaction(Transaction** head);
+void calculateTransactions(Transaction* head);
+void freeMemory(Transaction** head);
 
 int main(void)
 {
@@ -59,10 +66,12 @@ int main(void)
             break;
         }
         case 7: {
+            calculateTransactions(head);
             break;
         }
         case 8: {
             exit = true;
+            //freeMemory(&head);
             printf("\nThank you for using our Crypto Manager, see you soon!\n");
             break;
         }
@@ -87,17 +96,18 @@ void display() {
 
 }
 
-Transaction* createNode(int value) {
+Transaction* createNode(double value) {
     Transaction* newNode = (Transaction*)malloc(sizeof(Transaction));
     if (!newNode) {
         printf("Memory allocation failed!\n");
         exit(1);
     }
-    newNode->data = value;
+    newNode->amount = value;    // Set transaction amount
+    newNode->flags = 0;          
     newNode->next = NULL;
     return newNode;
 }
-void addToList(Transaction** head, int value) {
+void addToList(Transaction** head, double value) {
     Transaction* newNode = createNode(value);
     if (*head == NULL) {   // Empty list
         *head = newNode;
@@ -110,14 +120,30 @@ void addToList(Transaction** head, int value) {
 }
 
 void printTransactions(Transaction* head) {
-    while (head != NULL) {
-        printf("%d -> ", head->data);
-        head = head->next;
+
+    int transactionsNum = 1;
+    if (head == NULL) {
+        printf("No transactions found.\n");
+        return;
     }
-    printf("NULL\n");
+
+    printf("\nTransactions: \n");
+
+    while (head != NULL) {
+        printf("Transaction %i: $%.2f, Processed: %s, Refunded: %s\n", 
+            transactionsNum,
+            head->amount, 
+            (head->flags & FLAG_PROCESSED) ? "Yes" : "No",
+            (head->flags & FLAG_REFUNDED) ? "Yes" : "No");
+
+        head = head->next;
+        transactionsNum++;
+    }
+    
 }
 
 void freeMemory(Transaction** head) {
+
     Transaction* temp;
     while (*head != NULL) {
         temp = *head;
@@ -125,26 +151,54 @@ void freeMemory(Transaction** head) {
         free(temp);
     }
 }
-void addTransaction(Transaction* head) {
+void addTransaction(Transaction** head) {
 
-    
-    int amount;
+    double amount;
     bool stop = false;
 
     while (!stop) {
         printf("Enter transaction amount (-1 to stop): ");
-        scanf_s("%d", &amount);
+        scanf_s("%lf", &amount);
         getchar(); // consume newline
 
         if (amount < -1) {
-            printf("Please enter a valid amount");
+            printf("\nPlease enter a valid amount\n");
         }
         else if (amount == -1) {
             stop = true;
         }
         else {
-            addToList(&head, amount);
+            addToList(head, amount);
         }
     }
+}
+
+
+void calculateTransactions(Transaction* head) {
+
+    double total = 0.0;
+    int transactions = 0;
+
+    // If there is a transaction, then calculate ammount and 
+    // calculate how many transactions are there
+    while (head != NULL) {
+        total += head->amount;
+        head = head->next;
+        transactions++;
+    }
+
+    // If there is a transaciton, calculate average by dividing 
+    // total of transactions by how many transactions are there, basic math I mean (:
+    if (transactions != 0) {
+        double average;
+        average = total / transactions;
+        printf("\nTotal Transaction Amount: $%.2f", total);
+        printf("\nAverage Transaction Value: $%.2f\n", average);
+
+    }
+    else {
+        printf("\nNo transactions made yet.\n");
+    }
+
 }
 
