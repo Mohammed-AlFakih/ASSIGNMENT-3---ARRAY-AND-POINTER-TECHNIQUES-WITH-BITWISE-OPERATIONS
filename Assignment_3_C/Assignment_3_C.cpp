@@ -67,6 +67,7 @@ int main(void)
                 break;
             }
             case 5: {
+                swapTransactions(head);
                 break;
             }
             case 6: {
@@ -290,26 +291,97 @@ void swapTransactions(Transaction* head) {
         return;
     }
 
+    int maxTransactions = 0;
+    int minTransactions = 1;
+
     int first;
     int second;
 
-    int validation;
+    int validation1;
+    int validation2;
 
+    bool stop = false;
+
+    Transaction* temp1 = head;
+    Transaction* temp2 = head;
+
+    while (head != NULL) {
+        maxTransactions++;
+        head = head->next;
+    }
+
+    if (maxTransactions <= 1) {
+        printf("Insufficient number of transaction to swap\n\n");
+        return;
+    }
+
+    do {
+       
+        do {
+            printf("Enter first transaction index to swap: ");
+            validation1 = scanf_s("%i", &first);
+            getchar();
+
+            if ((first > maxTransactions) || (first < minTransactions)) {
+                printf("Invalid index, please enter a positive index and within the number of transactions\n\n");
+            }
+            else {
+                stop = true;
+            }
+
+        } while (!isValidInput(validation1) || !stop);
+
+        do {
+            printf("Enter second transaction index to swap: ");
+            validation2 = scanf_s("%i", &second);
+            getchar();
+
+            if (second > maxTransactions || second < minTransactions) {
+                printf("Invalid index, please enter a positive index and within the number of transactions\n\n");
+                stop = false;
+            }
+            else {
+                stop = true;
+            }
+
+        } while (!isValidInput(validation2) || !stop);
+        
+    }while (!stop);
     
-    do {
-        printf("Enter first transaction index to swap: ");
-        validation = scanf_s("%lf", &first);
-        getchar();
+    
 
-    } while (!isValidInput(validation));
+    double number1 = 0;
+    double number2 = 0;
 
-    do {
-        printf("Enter second transaction index to swap: ");
-        validation = scanf_s("%lf", &first);
-        getchar();
+    while (first != 0) {
+        number1 = temp1->amount;
+        temp1 = temp1->next;
+        first--;
+    }
 
-    } while (!isValidInput(validation));
+    while (second != 0) {
+        number2 = temp2->amount;
+        temp2 = temp2->next;
+        second--;
+    }
 
+    double decimal1 = number1;
+    double decimal2 = number2;
+
+    number1 = (int)number1 ^ (int)number2;
+    number2 = (int)number1 ^ (int)number2;
+    number1 = (int)number1 ^ (int)number2;
+
+    decimal1 = decimal1 - number2;
+    decimal2 = decimal2 - number1;
+
+    number1 += decimal2;
+    number2 += decimal1;
+
+    temp1->amount = number2;
+    temp2->amount = number1;
+
+    printf("\nFirst = $%.2f, Second = $%.2f\n\n", temp1->amount, temp2->amount);
 
 
 }
