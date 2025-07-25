@@ -25,61 +25,65 @@ typedef struct Transaction {
 
 void display();
 void printTransactions(Transaction* head);
-void insertEnd(Transaction** head, double value);
+void addToList(Transaction** head, double value);
 Transaction* createNode(double value);
 void addTransaction(Transaction** head);
 void calculateTransactions(Transaction* head);
 void freeMemory(Transaction** head);
+void transactionFee(Transaction* head);
+int isValidInput(int x);
 
 int main(void)
 {
     Transaction* head = NULL;
     int choice;
     bool exit = false;
+    int validation;
 
     while (!exit) {
         display();
         printf("Enter choice: ");
-        scanf_s("%d", &choice);
-        getchar(); // consume newline
+        validation = scanf_s("%d", &choice);
+        getchar();
 
-        switch (choice) {
-        case 1: {
-            addTransaction(&head);
-            break;
+        if (isValidInput(validation)) {
+            switch (choice) {
+            case 1: {
+                addTransaction(&head);
+                break;
+            }
+            case 2: {
+                printTransactions(head);
+                break;
+            }
+            case 3: {
+                transactionFee(head);
+                break;
+            }
+            case 4: {
+                break;
+            }
+            case 5: {
+                break;
+            }
+            case 6: {
+                break;
+            }
+            case 7: {
+                calculateTransactions(head);
+                break;
+            }
+            case 8: {
+                exit = true;
+                //freeMemory(&head);
+                printf("\nThank you for using our Crypto Manager, see you soon!\n");
+                break;
+            }
+            default:
+                printf("\nInvalid option, please select a number between 1 and 8\n");
+                break;
+            }
         }
-        case 2: {
-            printTransactions(head);
-            break;
-        }
-        case 3: {
-           
-            break;
-        }
-        case 4: {
-            break;
-        }
-        case 5: {
-            break;
-        }
-        case 6: {
-            break;
-        }
-        case 7: {
-            calculateTransactions(head);
-            break;
-        }
-        case 8: {
-            exit = true;
-            //freeMemory(&head);
-            printf("\nThank you for using our Crypto Manager, see you soon!\n");
-            break;
-        }
-        default:
-            printf("\nInvalid option, please select a number between 1 and 8\n");
-            break;
-        }
-
     }
 }
 
@@ -93,7 +97,7 @@ void display() {
     printf("6. Manage Flags\n");
     printf("7. Calculate Total and Average\n");
     printf("8. Exit\n");
-
+    return;
 }
 
 Transaction* createNode(double value) {
@@ -117,6 +121,8 @@ void addToList(Transaction** head, double value) {
     while (temp->next != NULL)
         temp = temp->next;
     temp->next = newNode;
+
+    return;
 }
 
 void printTransactions(Transaction* head) {
@@ -139,7 +145,7 @@ void printTransactions(Transaction* head) {
         head = head->next;
         transactionsNum++;
     }
-    
+    return;
 }
 
 void freeMemory(Transaction** head) {
@@ -150,27 +156,38 @@ void freeMemory(Transaction** head) {
         *head = (*head)->next;
         free(temp);
     }
+    return;
 }
 void addTransaction(Transaction** head) {
 
     double amount;
     bool stop = false;
+    int validation;
 
     while (!stop) {
         printf("Enter transaction amount (-1 to stop): ");
-        scanf_s("%lf", &amount);
-        getchar(); // consume newline
+        validation = scanf_s("%lf", &amount);
+        getchar();
+        // scanf_s return 1 if it is an integer. However, if the user
+        // entered a letter, it returns 0, therefore, I used it to check for 
+        // user input validation, I used isValidInput to print a message if
+        // user input is invalid (a letter)
+        if (isValidInput(validation)) {
+           
+            if (amount < -1) {
+                printf("\nPlease enter a valid amount\n");
+            }
+            else if (amount == -1) {
+                stop = true;
+            }
+            else {
+                addToList(head, amount);
+            }
+        }
 
-        if (amount < -1) {
-            printf("\nPlease enter a valid amount\n");
-        }
-        else if (amount == -1) {
-            stop = true;
-        }
-        else {
-            addToList(head, amount);
-        }
     }
+
+    return;
 }
 
 
@@ -179,7 +196,7 @@ void calculateTransactions(Transaction* head) {
     double total = 0.0;
     int transactions = 0;
 
-    // If there is a transaction, then calculate ammount and 
+    // If there is a transaction, then calculate amount and 
     // calculate how many transactions are there
     while (head != NULL) {
         total += head->amount;
@@ -187,7 +204,7 @@ void calculateTransactions(Transaction* head) {
         transactions++;
     }
 
-    // If there is a transaciton, calculate average by dividing 
+    // If there is a transaction, calculate average by dividing 
     // total of transactions by how many transactions are there, basic math I mean (:
     if (transactions != 0) {
         double average;
@@ -200,5 +217,52 @@ void calculateTransactions(Transaction* head) {
         printf("\nNo transactions made yet.\n");
     }
 
+    return;
 }
 
+void transactionFee(Transaction* head) {
+
+    Transaction* transactions = head;
+    double percentage;
+    int validation;
+
+    if (head == NULL) {
+        printf("No transactions to process yet!\n");
+        return;
+    }
+
+    do {
+            printf("Enter fee percentage: ");
+            validation = scanf_s("%lf", &percentage);
+            getchar();
+
+            if ((percentage < 0 || percentage > 100)) {
+                printf("Please enter a valid positive percentage, and no fee percentage above 100\n\n");
+            }
+        } while ((percentage < 0 || percentage > 100) || (!isValidInput(validation)));
+
+   
+    percentage /= 100;
+    
+    while (head != NULL) {
+
+        double deduct = head->amount * percentage;
+        head->amount -= deduct;
+        head = head->next;
+    }
+
+    printf("\nUpdated transactions after deduction:\n");
+    printTransactions(transactions);
+    return;
+}
+
+int isValidInput(int validation) {
+
+    if (validation != 1) {
+        printf("Invalid input, please enter a number.\n");
+        return 0;
+    }
+    else {
+        return 1;
+    }
+}
