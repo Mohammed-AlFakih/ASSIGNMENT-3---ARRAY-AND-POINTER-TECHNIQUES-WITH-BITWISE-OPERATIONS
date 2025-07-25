@@ -26,11 +26,13 @@ typedef struct Transaction {
 void display();
 void printTransactions(Transaction* head);
 void addToList(Transaction** head, double value);
-Transaction* createNode(double value);
 void addTransaction(Transaction** head);
 void calculateTransactions(Transaction* head);
 void freeMemory(Transaction** head);
 void transactionFee(Transaction* head);
+void findHighest(Transaction* head);
+void swapTransactions(Transaction* head);
+Transaction* createNode(double value);
 int isValidInput(int x);
 
 int main(void)
@@ -61,6 +63,7 @@ int main(void)
                 break;
             }
             case 4: {
+                findHighest(head);
                 break;
             }
             case 5: {
@@ -193,6 +196,11 @@ void addTransaction(Transaction** head) {
 
 void calculateTransactions(Transaction* head) {
 
+    if (head == NULL) {
+        printf("No transactions to calculate yet!\n");
+        return;
+    }
+
     double total = 0.0;
     int transactions = 0;
 
@@ -213,23 +221,21 @@ void calculateTransactions(Transaction* head) {
         printf("\nAverage Transaction Value: $%.2f\n", average);
 
     }
-    else {
-        printf("\nNo transactions made yet.\n");
-    }
+ 
 
     return;
 }
 
 void transactionFee(Transaction* head) {
 
-    Transaction* transactions = head;
-    double percentage;
-    int validation;
-
     if (head == NULL) {
         printf("No transactions to process yet!\n");
         return;
     }
+
+    Transaction* transactions = head;
+    double percentage;
+    int validation;
 
     do {
             printf("Enter fee percentage: ");
@@ -254,6 +260,58 @@ void transactionFee(Transaction* head) {
     printf("\nUpdated transactions after deduction:\n");
     printTransactions(transactions);
     return;
+}
+
+void findHighest(Transaction* head) {
+    
+    if (head == NULL) {
+        printf("No transactions to find highest value yet!\n");
+        return;
+    }
+
+    double highest = head->amount;
+
+    while (head != NULL) {
+        
+        if (highest < head->amount) {
+            highest = head->amount;
+        }
+        head = head->next;
+    }
+
+    printf("Highest transaction amount: $%.2f\n", highest);
+    return;
+}
+
+void swapTransactions(Transaction* head) {
+
+    if (head == NULL) {
+        printf("No transactions to swap yet!\n");
+        return;
+    }
+
+    int first;
+    int second;
+
+    int validation;
+
+    
+    do {
+        printf("Enter first transaction index to swap: ");
+        validation = scanf_s("%lf", &first);
+        getchar();
+
+    } while (!isValidInput(validation));
+
+    do {
+        printf("Enter second transaction index to swap: ");
+        validation = scanf_s("%lf", &first);
+        getchar();
+
+    } while (!isValidInput(validation));
+
+
+
 }
 
 int isValidInput(int validation) {
