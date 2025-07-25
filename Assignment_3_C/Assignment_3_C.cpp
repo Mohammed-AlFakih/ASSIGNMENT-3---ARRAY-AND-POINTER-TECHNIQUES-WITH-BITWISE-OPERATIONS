@@ -305,6 +305,9 @@ void swapTransactions(Transaction* head) {
     Transaction* temp1 = head;
     Transaction* temp2 = head;
 
+    Transaction* swap1 = head;
+    Transaction* swap2 = head;
+
     while (head != NULL) {
         maxTransactions++;
         head = head->next;
@@ -316,7 +319,7 @@ void swapTransactions(Transaction* head) {
     }
 
     do {
-       
+
         do {
             printf("Enter first transaction index to swap: ");
             validation1 = scanf_s("%i", &first);
@@ -345,26 +348,43 @@ void swapTransactions(Transaction* head) {
             }
 
         } while (!isValidInput(validation2) || !stop);
-        
-    }while (!stop);
-    
-    
+
+    } while (!stop);
+
+
 
     double number1 = 0;
     double number2 = 0;
 
-    while (first != 0) {
-        number1 = temp1->amount;
+
+    // Traverse through dynamic linked list to find
+    // the value with specified index, the first number to swap.
+    for (int i = 1; i < first; i++) {
         temp1 = temp1->next;
-        first--;
     }
+    number1 = temp1->amount;
 
-    while (second != 0) {
-        number2 = temp2->amount;
+    // Traverse through dynamic linked list to find
+    // the value with specified index, the second number to swap.
+    for (int i = 1; i < second; i++) {
         temp2 = temp2->next;
-        second--;
     }
+    number2 = temp2->amount;
 
+
+    // I solved the problem by storing the decimal difference.
+    // Since XOR only does not support swapping floating numbers, I stored
+    // the original number in variables called (decimal1, decimal2). Since casting
+    // (int) for the numbers to swap, the decimals will be lost. There for, we can
+    // add them after this change since we stored them in (decimal1, decimal2).
+    
+    // Example: number1 = $2.50, number2 = $5.75. 
+    // After casting and swapping, they will be: number1 = $5.00, number2 = $2.00.
+    // Now, we take the difference by: decimal1 - number2 (because they swapped values)
+    // which means: $2.50 - $2.00 = $0.50.
+    // And: decimal2 = decimal2 - number1, -> ($5.75 - $5.00 = $0.75).
+    // Now, number1 += decimal2 = $5.00 + $0.75 = $5.75.
+    // And: number2 += decimal1 = $2.00 + $0.50 = $2.50.
     double decimal1 = number1;
     double decimal2 = number2;
 
@@ -378,12 +398,13 @@ void swapTransactions(Transaction* head) {
     number1 += decimal2;
     number2 += decimal1;
 
-    temp1->amount = number2;
-    temp2->amount = number1;
+    // Update the values in transactions list
+    temp1->amount = number1;
+    temp2->amount = number2;
 
-    printf("\nFirst = $%.2f, Second = $%.2f\n\n", temp1->amount, temp2->amount);
+    printf("\nSwapping was successful!\n\n");
 
-
+    return;
 }
 
 int isValidInput(int validation) {
