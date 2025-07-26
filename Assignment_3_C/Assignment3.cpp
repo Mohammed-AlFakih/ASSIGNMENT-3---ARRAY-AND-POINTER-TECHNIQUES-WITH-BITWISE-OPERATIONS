@@ -1,8 +1,8 @@
 /*
-* FILE : main.cpp
+* FILE : Assignment3.cpp
 * PROJECT : SENG1070 - ASSIGNMENT 3 – ARRAY AND POINTER TECHNIQUES WITH BITWISE OPERATIONS
 * PROGRAMMER : Mohammed Al-Fakih Student
-* FIRST VERSION : 2025-07-24
+* FIRST VERSION : 2025-07-25
 * DESCRIPTION :
 * A Cryptocurrency Wallet Manager
 */
@@ -10,30 +10,13 @@
 #define FLAG_PROCESSED 0x01  
 #define FLAG_REFUNDED  0x02
 
+#include "assignment3.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <ctype.h>  
 #include <iostream>
-
-typedef struct Transaction {
-    double amount;
-    unsigned char flags;
-    struct Transaction* next;
-} Transaction;
-
-void display();
-void printTransactions(Transaction* head);
-void addToList(Transaction** head, double value);
-void addTransaction(Transaction** head);
-void calculateTransactions(Transaction* head);
-void freeMemory(Transaction** head);
-void transactionFee(Transaction* head);
-void findHighest(Transaction* head);
-void swapTransactions(Transaction* head);
-Transaction* createNode(double value);
-int isValidInput(int x);
 
 int main(void)
 {
@@ -71,6 +54,7 @@ int main(void)
                 break;
             }
             case 6: {
+                maskTransactions(head);
                 break;
             }
             case 7: {
@@ -79,7 +63,7 @@ int main(void)
             }
             case 8: {
                 exit = true;
-                //freeMemory(&head);
+                freeMemory(&head);
                 printf("\nThank you for using our Crypto Manager, see you soon!\n");
                 break;
             }
@@ -91,7 +75,16 @@ int main(void)
     }
 }
 
-void display() {
+//
+// FUNCTION : display
+// DESCRIPTION :
+// Display options for user
+// PARAMETERS :
+// NONE
+// RETURNS :
+// NONE
+//
+void display(void) {
 
     printf("\n1. Add Transaction\n");
     printf("2. Display Transactions\n");
@@ -104,6 +97,15 @@ void display() {
     return;
 }
 
+//
+// FUNCTION : createNode
+// DESCRIPTION :
+// Creates and initialize struct for transactions
+// PARAMETERS :
+// double : the amount that the user provided
+// RETURNS :
+// Transaction* : a pointer to that list
+//
 Transaction* createNode(double value) {
     Transaction* newNode = (Transaction*)malloc(sizeof(Transaction));
     if (!newNode) {
@@ -129,16 +131,27 @@ void addToList(Transaction** head, double value) {
     return;
 }
 
+//
+// FUNCTION : printTransactions
+// DESCRIPTION :
+// Prints all transactions
+// PARAMETERS :
+// Transaction* : the head for the list to traverse through
+// RETURNS :
+// NONE
+//
 void printTransactions(Transaction* head) {
 
-    int transactionsNum = 1;
+    // If there is no transactions, exit.
     if (head == NULL) {
         printf("No transactions found.\n");
         return;
     }
 
+    int transactionsNum = 1;
     printf("\nTransactions: \n");
 
+    // Print each transaction 
     while (head != NULL) {
         printf("Transaction %i: $%.2f, Processed: %s, Refunded: %s\n", 
             transactionsNum,
@@ -152,6 +165,15 @@ void printTransactions(Transaction* head) {
     return;
 }
 
+//
+// FUNCTION : freeMemory
+// DESCRIPTION :
+// Free all memory allocated
+// PARAMETERS :
+// Transaction** : pointer to pointer for the head for the list to traverse through
+// RETURNS :
+// NONE
+//
 void freeMemory(Transaction** head) {
 
     Transaction* temp;
@@ -162,6 +184,16 @@ void freeMemory(Transaction** head) {
     }
     return;
 }
+
+//
+// FUNCTION : addTransaction
+// DESCRIPTION :
+// Adds transaction to list of transactions
+// PARAMETERS :
+// Transaction** : pointer to pointer for to add transactions to list
+// RETURNS :
+// NONE
+//
 void addTransaction(Transaction** head) {
 
     double amount;
@@ -175,7 +207,7 @@ void addTransaction(Transaction** head) {
         // scanf_s return 1 if it is an integer. However, if the user
         // entered a letter, it returns 0, therefore, I used it to check for 
         // user input validation, I used isValidInput to print a message if
-        // user input is invalid (a letter)
+        // user input is invalid (a letter).
         if (isValidInput(validation)) {
            
             if (amount < -1) {
@@ -194,7 +226,15 @@ void addTransaction(Transaction** head) {
     return;
 }
 
-
+//
+// FUNCTION : calculateTransactions
+// DESCRIPTION :
+// Calculates the total and average for transactions made
+// PARAMETERS :
+// Transaction* : the head for the list to traverse through
+// RETURNS :
+// NONE
+//
 void calculateTransactions(Transaction* head) {
 
     if (head == NULL) {
@@ -206,7 +246,7 @@ void calculateTransactions(Transaction* head) {
     int transactions = 0;
 
     // If there is a transaction, then calculate amount and 
-    // calculate how many transactions are there
+    // calculate how many transactions are there.
     while (head != NULL) {
         total += head->amount;
         head = head->next;
@@ -227,8 +267,18 @@ void calculateTransactions(Transaction* head) {
     return;
 }
 
+//
+// FUNCTION : transactionFee
+// DESCRIPTION :
+// Apply fee percentage to transactions
+// PARAMETERS :
+// Transaction* : the head for the list to traverse through
+// RETURNS :
+// NONE
+//
 void transactionFee(Transaction* head) {
 
+    // If there is no transactions, exit.
     if (head == NULL) {
         printf("No transactions to process yet!\n");
         return;
@@ -238,6 +288,7 @@ void transactionFee(Transaction* head) {
     double percentage;
     int validation;
 
+    // Validate user input
     do {
             printf("Enter fee percentage: ");
             validation = scanf_s("%lf", &percentage);
@@ -248,9 +299,10 @@ void transactionFee(Transaction* head) {
             }
         } while ((percentage < 0 || percentage > 100) || (!isValidInput(validation)));
 
-   
+    // Divide by 100 to get the precentage
     percentage /= 100;
     
+    // Deduct each transaction by fee value, and update them
     while (head != NULL) {
 
         double deduct = head->amount * percentage;
@@ -262,16 +314,27 @@ void transactionFee(Transaction* head) {
     printTransactions(transactions);
     return;
 }
-
+//
+// FUNCTION : findHighest
+// DESCRIPTION :
+// Finds highest transaction in transactions
+// PARAMETERS :
+// Transaction* : the head for the list to traverse through
+// RETURNS :
+// NONE
+//
 void findHighest(Transaction* head) {
     
+    // If there is no transactions, exit.
     if (head == NULL) {
         printf("No transactions to find highest value yet!\n");
         return;
     }
 
+    // Set highest value to first element.
     double highest = head->amount;
 
+    // Check if there is a higher value, and update.
     while (head != NULL) {
         
         if (highest < head->amount) {
@@ -284,8 +347,18 @@ void findHighest(Transaction* head) {
     return;
 }
 
+//
+// FUNCTION : swapTransactions
+// DESCRIPTION :
+// Swap values between two transactions
+// PARAMETERS :
+// Transaction* : the head for the list to traverse through
+// RETURNS :
+// NONE
+//
 void swapTransactions(Transaction* head) {
 
+    // If there is no transactions, exit.
     if (head == NULL) {
         printf("No transactions to swap yet!\n");
         return;
@@ -305,19 +378,20 @@ void swapTransactions(Transaction* head) {
     Transaction* temp1 = head;
     Transaction* temp2 = head;
 
-    Transaction* swap1 = head;
-    Transaction* swap2 = head;
-
+    // Calucate size of transaction list
     while (head != NULL) {
         maxTransactions++;
         head = head->next;
     }
 
+    // If the size is 1 or less, then there is no two number
+    // can be swapped!
     if (maxTransactions <= 1) {
         printf("Insufficient number of transaction to swap\n\n");
         return;
     }
 
+    // Validate each index
     do {
 
         do {
@@ -407,10 +481,109 @@ void swapTransactions(Transaction* head) {
     return;
 }
 
+//
+// FUNCTION : maskTransactions
+// DESCRIPTION :
+// Sets, clears, and toggles menu flags
+// PARAMETERS :
+// Transaction* : the head for the list to traverse through
+// RETURNS :
+// NONE
+//
+void maskTransactions(Transaction* head) {
+
+    // If there is no transactions, exit.
+    if (head == NULL) {
+        printf("No transactions to find highest value yet!\n");
+        return;
+    }
+
+    Transaction* current = head;
+
+    int maxTransactions = 0;
+    int minTransactions = 1;
+    bool stop1 = false;
+    bool stop2 = false;
+
+    int choice;
+    int validation1;
+
+    // Calculate the size of transactions list
+    while (head != NULL) {
+        maxTransactions++;
+        head = head->next;
+    }
+   
+    // Validate user input
+    do {
+        printf("1. Set Processed \n2. Clear Processed \n3. Toggle Refunded\n");
+        printf("Enter choice: ");
+        validation1 = scanf_s("%i", &choice);
+        getchar();
+
+        if (!isValidInput(validation1) || choice > 3 || choice < 1) {
+            printf("Invalid choice, please enter a valid option.\n\n");
+        }
+        else {
+            stop1 = true;
+        }
+
+    } while (!isValidInput(validation1) || choice > 3 || choice < 1 || !stop1);
+    
+
+    int index;
+    int validation2;
+
+    // Validate user input
+    do {
+        printf("\nEnter transaction index: ");
+        validation2 = scanf_s("%i", &index);
+        getchar();
+
+        if ((index > maxTransactions) || (index < minTransactions)) {
+            printf("Invalid index, please enter a positive index and within the number of transactions\n\n");
+        }
+        else {
+            stop2 = true;
+        }
+
+    } while (!isValidInput(validation2) || !stop2);
+
+    // Traverse through transactions and get the transaction at
+    // the desired index.
+    for (int i = 1; i < index; i++) {
+        current = current->next;
+    }
+
+    switch (choice) {
+    case 1: // Set Processed
+        current->flags |= FLAG_PROCESSED;
+        printf("Transaction %d marked as PROCESSED.\n", index);
+        break;
+
+    case 2: // Clear Processed
+        current->flags &= ~FLAG_PROCESSED;
+        printf("Transaction %d cleared from PROCESSED.\n", index);
+        break;
+
+    case 3: // Toggle Refunded
+        current->flags ^= FLAG_REFUNDED;
+        printf("Transaction %d toggled REFUNDED flag.\n", index);
+        break;
+    }
+}
+//
+// FUNCTION : isValidInput
+// DESCRIPTION :
+// Validates user input if it is an integer or not
+// PARAMETERS :
+// int : takes the value of validation and checks if it is equal to 1 or not
+// RETURNS :
+// int : true or false, 1 or 0
+//
 int isValidInput(int validation) {
 
     if (validation != 1) {
-        printf("Invalid input, please enter a number.\n");
         return 0;
     }
     else {
